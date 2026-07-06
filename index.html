@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A Nice Cup of Tea — FPV Tea Simulator</title>
+<link rel="stylesheet" href="style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="objective">
+    <div id="objective-step">Step 1/10</div>
+    <div id="objective-text">Pick up the kettle</div>
+  </div>
+  <button id="reset-btn" title="Restart">⟲ Restart</button>
+  <div id="reticle"><div id="reticle-dot"></div></div>
+  <div id="prompt" class="hidden"></div>
+  <div id="toast" class="hidden"></div>
+</div>
+
+<!-- Intro overlay -->
+<div id="intro" class="overlay">
+  <div class="panel">
+    <h1>A Nice Cup of Tea</h1>
+    <p class="sub">First-person tea-making, in your own kitchen.</p>
+    <div class="controls-grid">
+      <span><b>W A S D</b></span><span>move</span>
+      <span><b>Mouse</b></span><span>look</span>
+      <span><b>E</b> / <b>Click</b></span><span>interact</span>
+      <span><b>Hold right-click</b></span><span>inspect (zoom)</span>
+      <span><b>Esc</b></span><span>release mouse</span>
+    </div>
+    <button id="start-btn">Put the kettle on</button>
+    <p class="hint">Click the button, then the game captures your mouse.</p>
+  </div>
+</div>
+
+<!-- Success overlay -->
+<div id="success" class="overlay hidden">
+  <div class="panel">
+    <h1>Tea made ☕</h1>
+    <p class="sub" id="success-desc">Lovely. Milk, no sugar.</p>
+    <p id="success-time"></p>
+    <button id="again-btn">Make another cup</button>
+  </div>
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

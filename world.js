@@ -70,8 +70,8 @@ function initMaterials() {
   const frost = frostedSet();
   M.frosted = new THREE.MeshPhysicalMaterial({
     map: frost.map, normalMap: frost.normalMap,
-    emissive: 0xe4ebef, emissiveIntensity: 0.5,
-    roughness: 0.9, transmission: 0.25, thickness: 0.04, transparent: true,
+    emissive: 0xdde6ec, emissiveIntensity: 0.16,
+    roughness: 0.85, transmission: 0.25, thickness: 0.04, transparent: true,
   });
   M.red = new THREE.MeshPhysicalMaterial({
     color: 0xc0271f, roughness: 0.2, clearcoat: 0.9, clearcoatRoughness: 0.15, envMapIntensity: 0.9,
@@ -435,7 +435,7 @@ export function buildWorld(scene) {
   const cx = (minX + maxX) / 2, cz = (minZ + maxZ) / 2;
 
   /* ---- shell ---- */
-  const flag = flagstoneSet(1024, [1.5, 2.8]);
+  const flag = flagstoneSet(1024, [2.1, 4.0]);
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(W, L),
     new THREE.MeshStandardMaterial({
@@ -499,8 +499,8 @@ export function buildWorld(scene) {
 
   /* ---- glass-block window band ---- */
   const blocks = new THREE.Group();
-  const bw = 0.42, bh = 0.235, rows = 3;
-  const bandY0 = 1.72, bandZ0 = -0.5, bandZ1 = -4.9;
+  const bw = 0.27, bh = 0.25, rows = 3;
+  const bandY0 = 1.7, bandZ0 = -0.5, bandZ1 = -4.9;
   const cols = Math.floor(Math.abs(bandZ1 - bandZ0) / bw);
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -545,10 +545,10 @@ export function buildWorld(scene) {
   doorG.add(doorGlass);
   // garden view set back for parallax
   const garden = new THREE.Mesh(
-    new THREE.PlaneGeometry(doorW + 0.7, doorH + 0.6),
+    new THREE.PlaneGeometry(doorW - 0.14, doorH - 0.36),
     new THREE.MeshBasicMaterial({ map: gardenTexture() })
   );
-  garden.position.set(doorX, doorH / 2 + 0.05, minZ - 0.4);
+  garden.position.set(doorX, doorH / 2 + 0.08, minZ + 0.02);
   doorG.add(garden);
   refs.gardenPlane = garden;
   const handle = cyl(0.011, 0.011, 0.14, M.chrome, doorX + doorW / 2 - 0.1, 1.02, minZ + 0.085);
@@ -654,7 +654,7 @@ export function buildWorld(scene) {
   /* ---- black floating shelf + items ---- */
   const shelfY = 1.5, shelfZ0 = -0.45, shelfZ1 = -4.5;
   const shelfL = Math.abs(shelfZ1 - shelfZ0);
-  const shelf = rbox(0.27, 0.16, shelfL, 0.01, M.blackMatte, maxX - 0.145, shelfY - 0.08, (shelfZ0 + shelfZ1) / 2);
+  const shelf = rbox(0.26, 0.075, shelfL, 0.008, M.blackMatte, maxX - 0.14, shelfY - 0.038, (shelfZ0 + shelfZ1) / 2);
   shelf.castShadow = true; shelf.receiveShadow = true;
   world.add(shelf);
 
@@ -1016,11 +1016,11 @@ export function buildWorld(scene) {
   colliders.push({ minX: -1.35, maxX: -0.96, minZ: -4.6, maxZ: -3.52 });
 
   /* ---- lighting: soft overcast daylight ---- */
-  const hemi = new THREE.HemisphereLight(0xe3ebf0, 0x5f5a4c, 0.45);
+  const hemi = new THREE.HemisphereLight(0xe3ebf0, 0x5f5a4c, 0.3);
   scene.add(hemi);
 
   // key light through the garden door — cool, soft
-  const sun = new THREE.DirectionalLight(0xeef3f6, 2.4);
+  const sun = new THREE.DirectionalLight(0xeef3f6, 3.2);
   sun.position.set(0.5, 2.4, -8.0);
   sun.target.position.set(-0.15, 0.3, -1.2);
   sun.castShadow = true;
@@ -1046,11 +1046,11 @@ export function buildWorld(scene) {
   scene.add(windowArea);
 
   // faint warm interior bounce
-  const ceilLamp = new THREE.PointLight(0xffedd8, 5, 6.5, 1.9);
-  ceilLamp.position.set(-0.2, 2.32, -2.2);
+  const ceilLamp = new THREE.PointLight(0xffedd8, 2.2, 6.5, 1.9);
+  ceilLamp.position.set(-0.2, 2.28, -2.2);
   scene.add(ceilLamp);
-  const nearFill = new THREE.PointLight(0xfff4e4, 2.5, 4, 2);
-  nearFill.position.set(0, 2.2, -0.4);
+  const nearFill = new THREE.PointLight(0xfff4e4, 1.0, 4, 2);
+  nearFill.position.set(0, 2.15, -0.5);
   scene.add(nearFill);
 
   return { refs, interactables, colliders, factories: { makeTeabag, makeMug } };

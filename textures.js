@@ -149,13 +149,13 @@ export function flagstoneSet(size = 1024, repeat = [1.6, 3.0]) {
         : 0.08 + f * 0.05);
       const i4 = idx * 4;
       if (inStone) {
-        const t = s1.tone * (0.82 + n * 0.32) * (0.92 + f * 0.16);
-        const base = 152 * t + 62;
-        img.data[i4] = base + s1.warm * 16;
-        img.data[i4 + 1] = base + s1.warm * 9;
-        img.data[i4 + 2] = base - s1.warm * 6;
+        const t = s1.tone * (0.86 + n * 0.24) * (0.94 + f * 0.12);
+        const base = 96 * t + 84;
+        img.data[i4] = base + s1.warm * 10;
+        img.data[i4 + 1] = base + s1.warm * 6;
+        img.data[i4 + 2] = base - s1.warm * 4;
       } else {
-        const g = 96 + f * 42;
+        const g = 88 + f * 30;
         img.data[i4] = g; img.data[i4 + 1] = g - 3; img.data[i4 + 2] = g - 7;
       }
       img.data[i4 + 3] = 255;
@@ -168,7 +168,7 @@ export function flagstoneSet(size = 1024, repeat = [1.6, 3.0]) {
   }
   return {
     map: toTexture(colorC, { repeat }),
-    normalMap: toTexture(normalFromHeight(height, size, 3.2), { srgb: false, repeat }),
+    normalMap: toTexture(normalFromHeight(height, size, 2.2), { srgb: false, repeat }),
     roughnessMap: toTexture(grayCanvas(rough, size), { srgb: false, repeat }),
   };
 }
@@ -240,7 +240,7 @@ export function brushedSteelSet(size = 512, repeat = [2, 2], vertical = false) {
 /* Wood                                                                */
 /* ------------------------------------------------------------------ */
 
-export function woodSet(size = 512, base = [148, 108, 68], repeat = [1, 1]) {
+export function woodSet(size = 512, base = [132, 102, 74], repeat = [1, 1]) {
   const rand = mulberry32(4242);
   const warp = fbm(size, 3, mulberry32(11));
   const height = new Float32Array(size * size);

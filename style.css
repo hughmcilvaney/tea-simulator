@@ -10,6 +10,15 @@ html, body {
 
 #scene { position: fixed; inset: 0; display: block; }
 
+/* subtle photographic vignette over the 3D view */
+#vignette {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    rgba(0,0,0,0) 55%, rgba(8,10,10,0.14) 82%, rgba(5,7,7,0.34) 100%);
+  z-index: 1;
+}
+
 .hidden { display: none !important; }
 
 /* ---------- HUD ---------- */

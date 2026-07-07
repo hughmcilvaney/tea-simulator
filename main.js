@@ -1,5 +1,10 @@
-// Entry point: renderer, world, player, game loop.
+// Entry point: renderer, environment, post pipeline, world, player, game loop.
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { buildWorld } from './world.js';
 import { Player } from './player.js';
 import { TeaGame } from './game.js';
@@ -15,18 +20,47 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.12;
+renderer.toneMappingExposure = 1.05;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xdfe8ec);
 
+// image-based lighting so metals, ceramics and glass read as real
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.45;
+
 const camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, 0.05, 40);
-scene.add(camera); // so held objects (children of the camera) render
+scene.add(camera); // held objects are camera children
 
 const world = buildWorld(scene);
 const player = new Player(camera, canvas, world.colliders);
 const sfx = new Sfx();
 const game = new TeaGame(scene, camera, world, sfx);
+
+/* ---------- post-processing (AO + bloom), with graceful fallback ---------- */
+let composer = null;
+(async () => {
+  try {
+    const { N8AOPass } = await import('n8ao');
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const n8ao = new N8AOPass(scene, camera, window.innerWidth, window.innerHeight);
+    n8ao.configuration.aoRadius = 0.5;
+    n8ao.configuration.distanceFalloff = 1.0;
+    n8ao.configuration.intensity = 2.6;
+    n8ao.setQualityMode('Medium');
+    composer.addPass(n8ao);
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight), 0.12, 0.6, 0.92
+    );
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+  } catch (err) {
+    console.warn('Post-processing unavailable, falling back to direct render:', err);
+    composer = null;
+  }
+})();
 
 /* ---------- input: interact ---------- */
 function tryInteract() {
@@ -47,10 +81,9 @@ document.getElementById('start-btn').addEventListener('click', () => {
   ui.showHud();
   player.enabled = true;
   player.lock();
-  sfx._ensure(); // unlock audio on user gesture
+  sfx._ensure();
 });
 
-// clicking the canvas re-locks the pointer after Esc
 canvas.addEventListener('click', () => {
   if (player.enabled && !player.locked && !game.done) player.lock();
 });
@@ -63,6 +96,7 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  if (composer) composer.setSize(window.innerWidth, window.innerHeight);
 });
 
 /* ---------- loop ---------- */
@@ -72,6 +106,7 @@ function loop() {
   const dt = Math.min(clock.getDelta(), 0.05);
   player.update(dt);
   game.update(dt, player.locked);
-  renderer.render(scene, camera);
+  if (composer) composer.render();
+  else renderer.render(scene, camera);
 }
 loop();

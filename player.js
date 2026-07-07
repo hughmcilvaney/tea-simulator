@@ -13,7 +13,7 @@ export class Player {
     this.canvas = canvas;
     this.colliders = colliders;
     this.pos = new THREE.Vector3(0.05, EYE_HEIGHT, -0.55);
-    this.yaw = Math.PI;      // face down the galley toward the garden door
+    this.yaw = 0;            // face down the galley toward the garden door
     this.pitch = 0;
     this.keys = new Set();
     this.enabled = false;

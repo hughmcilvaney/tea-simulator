@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { buildWorld } from './world.js';
@@ -40,27 +41,25 @@ const game = new TeaGame(scene, camera, world, sfx);
 
 /* ---------- post-processing (AO + bloom), with graceful fallback ---------- */
 let composer = null;
-(async () => {
-  try {
-    const { N8AOPass } = await import('n8ao');
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const n8ao = new N8AOPass(scene, camera, window.innerWidth, window.innerHeight);
-    n8ao.configuration.aoRadius = 0.5;
-    n8ao.configuration.distanceFalloff = 1.0;
-    n8ao.configuration.intensity = 2.6;
-    n8ao.setQualityMode('Medium');
-    composer.addPass(n8ao);
-    const bloom = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight), 0.12, 0.6, 0.92
-    );
-    composer.addPass(bloom);
-    composer.addPass(new OutputPass());
-  } catch (err) {
-    console.warn('Post-processing unavailable, falling back to direct render:', err);
-    composer = null;
-  }
-})();
+try {
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  const gtao = new GTAOPass(scene, camera, window.innerWidth, window.innerHeight);
+  gtao.updateGtaoMaterial({
+    radius: 0.28, distanceExponent: 1.2, thickness: 1.0,
+    scale: 1.4, samples: 12, distanceFallOff: 1.0, screenSpaceRadius: false,
+  });
+  gtao.blendIntensity = 0.9;
+  composer.addPass(gtao);
+  const bloom = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.12, 0.6, 0.92
+  );
+  composer.addPass(bloom);
+  composer.addPass(new OutputPass());
+} catch (err) {
+  console.warn('Post-processing unavailable, falling back to direct render:', err);
+  composer = null;
+}
 
 /* ---------- input: interact ---------- */
 function tryInteract() {
